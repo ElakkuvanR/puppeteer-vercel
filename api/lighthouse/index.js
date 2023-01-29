@@ -25,7 +25,6 @@ app.get("/api/lighthouse", async (req, res) => {
 
   try {
     let browser = await puppeteer.launch(options);
-
     let page = await browser.newPage();
     await page.goto("https://xm-cloud-integration.vercel.app/About");
     res.send(await page.title());
