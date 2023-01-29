@@ -10,11 +10,11 @@ if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
   puppeteer = require("puppeteer");
 }
 
-async function loopMe() {
-  for (let i = 0; i <= 100000; i++) {
-    console.log("i value", i);
-  }
-}
+// async function loopMe() {
+//   for (let i = 0; i <= 100000; i++) {
+//     console.log("i value", i);
+//   }
+// }
 
 app.get("/api/lighthouse", async (req, res) => {
   let options = {};
@@ -30,12 +30,10 @@ app.get("/api/lighthouse", async (req, res) => {
   }
 
   try {
-    res.status(200).json("I will continue to work.");
-    await loopMe();
-    // let browser = await puppeteer.launch(options);
-    // let page = await browser.newPage();
-    // await page.goto("https://xm-cloud-integration.vercel.app/About");
-    // res.send(await page.title());
+    let browser = await puppeteer.launch(options);
+    let page = await browser.newPage();
+    await page.goto("https://xm-cloud-integration.vercel.app/About");
+    res.send(await page.title());
   } catch (err) {
     console.error(err);
     return null;
