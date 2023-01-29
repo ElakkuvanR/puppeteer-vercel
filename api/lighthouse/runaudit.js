@@ -55,50 +55,36 @@ function getReportFilePath(outputDirectory, pageName) {
 
 async function launchChromeAndRunLighthouse(page, environmentId, projectId) {
   console.log("Starting the Lighthouse Audit");
-  let options = {};
-  if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-    chrome = require("chrome-aws-lambda");
-    puppeteer = require("puppeteer-core");
-  } else {
-    puppeteer = require("puppeteer");
-  }
-  if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-    options = {
-      args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
-      defaultViewport: chrome.defaultViewport,
-      executablePath: await chrome.executablePath,
-      headless: true,
-      ignoreHTTPSErrors: true,
-    };
-  }
-
-  try {
-    let browser = await puppeteer.launch(options);
-    let page = await browser.newPage();
-    await page.goto(page.url);
-    console.log("page title:- ", await page.title());
-    // const { port } = new URL(browser.wsEndpoint());
-    // const lhoptions = {
-    //   logLevel: "info",
-    //   output: "html",
-    //   onlyCategories: ["performance"],
-    //   port: port,
-    // };
-    // const runnerResult = await lighthouse(page.url, lhoptions);
-    // console.log("runnerResult ", runnerResult);
-    // writeResults(page, runnerResult, environmentId, projectId);
-    await browser.close();
-    await chrome.kill();
-  } catch (err) {
-    console.error(err);
-    return null;
-  }
+  const browserPath = await getBrowserPath();
+  console.log("browserPath ", browserPath);
+  const logLevel = "info";
+  let chrome;
+  log.setLevel(logLevel);
+  chrome = await chromeLauncher.launch({
+    chromePath: browserPath,
+    chromeFlags: [
+      "--headless",
+      "--no-sandbox",
+      "--disable-gpu",
+      "--disable-dev-shm-usage",
+    ],
+    logLevel,
+  });
+  const options = {
+    logLevel: "info",
+    output: "html",
+    onlyCategories: ["performance"],
+    port: chrome.port,
+  };
+  const runnerResult = await lighthouse(page.url, options);
+  console.log("runnerResult ", runnerResult);
+  writeResults(page, runnerResult, environmentId, projectId);
+  await chrome.kill();
 }
 //#endregion
 
 app.get("/api/lighthouse", async (req, res) => {
   try {
-    res.status(200).json("LH run is successful");
     await launchChromeAndRunLighthouse(
       {
         url: "https://xm-cloud-integration.vercel.app/About",
@@ -110,6 +96,7 @@ app.get("/api/lighthouse", async (req, res) => {
   } catch (error) {
     console.log(error);
   }
+  res.status(200).json("I will continue to work.");
 });
 
 app.listen(process.env.PORT || 3000, () => {

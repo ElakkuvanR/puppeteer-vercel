@@ -1,6 +1,6 @@
 {
-  "builds": [{ "src": "/api/lighthouse/index.js", "use": "@vercel/node" }],
+  "builds": [{ "src": "/api/lighthouse/runaudit.js", "use": "@vercel/node" }],
   "routes": [
-    { "src": "/api/lighthouse(.*)", "dest": "/api/lighthouse/index.js" }
+    { "src": "/api/lighthouse(.*)", "dest": "/api/lighthouse/runaudit.js" }
   ]
 }
