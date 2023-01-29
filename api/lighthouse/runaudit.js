@@ -8,12 +8,12 @@ let chrome = {};
 //#region Launch Lighthouse to audit
 const getBrowserPath = async () => {
   let options = {};
-  //   if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-  //     chrome = require("chrome-aws-lambda");
-  //     puppeteer = require("puppeteer-core");
-  //   } else {
-  //     puppeteer = require("puppeteer");
-  //   }
+  if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+    chrome = require("chrome-aws-lambda");
+    puppeteer = require("puppeteer-core");
+  } else {
+    puppeteer = require("puppeteer");
+  }
   //   const browserFetcher = puppeteer.createBrowserFetcher();
   //   const revisions = await browserFetcher.localRevisions();
   //   if (revisions.length <= 0) {
