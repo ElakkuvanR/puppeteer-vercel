@@ -85,7 +85,7 @@ async function launchChromeAndRunLighthouse(page, environmentId, projectId) {
 
 app.get("/api/lighthouse", async (req, res) => {
   try {
-    await launchChromeAndRunLighthouse(
+    launchChromeAndRunLighthouse(
       {
         url: "https://xm-cloud-integration.vercel.app/About",
         name: "about",
@@ -93,6 +93,7 @@ app.get("/api/lighthouse", async (req, res) => {
       "dev",
       "123"
     );
+    res.status(200).json("LH run is successful");
   } catch (error) {
     console.log(error);
   }
