@@ -7,19 +7,30 @@ let puppeteer;
 let chrome = {};
 //#region Launch Lighthouse to audit
 const getBrowserPath = async () => {
+  let options = {};
+  //   if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+  //     chrome = require("chrome-aws-lambda");
+  //     puppeteer = require("puppeteer-core");
+  //   } else {
+  //     puppeteer = require("puppeteer");
+  //   }
+  //   const browserFetcher = puppeteer.createBrowserFetcher();
+  //   const revisions = await browserFetcher.localRevisions();
+  //   if (revisions.length <= 0) {
+  //     throw new Error("Could not find local browser");
+  //   }
+  //   const info = await browserFetcher.revisionInfo(revisions[0]);
   if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-    chrome = require("chrome-aws-lambda");
-    puppeteer = require("puppeteer-core");
-  } else {
-    puppeteer = require("puppeteer");
+    options = {
+      args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
+      defaultViewport: chrome.defaultViewport,
+      executablePath: await chrome.executablePath,
+      headless: true,
+      ignoreHTTPSErrors: true,
+    };
   }
-  const browserFetcher = puppeteer.createBrowserFetcher();
-  const revisions = await browserFetcher.localRevisions();
-  if (revisions.length <= 0) {
-    throw new Error("Could not find local browser");
-  }
-  const info = await browserFetcher.revisionInfo(revisions[0]);
-  return info.executablePath;
+
+  return options.executablePath;
 };
 
 function writeResults(page, results, environmentId, projectId) {
