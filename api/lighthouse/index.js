@@ -27,7 +27,7 @@ app.get("/api/lighthouse", async (req, res) => {
     let browser = await puppeteer.launch(options);
 
     let page = await browser.newPage();
-    await page.goto("https://www.google.com");
+    await page.goto("https://xm-cloud-integration.vercel.app/About");
     res.send(await page.title());
   } catch (err) {
     console.error(err);
