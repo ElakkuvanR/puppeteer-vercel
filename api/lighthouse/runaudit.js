@@ -55,31 +55,39 @@ function getReportFilePath(outputDirectory, pageName) {
 
 async function launchChromeAndRunLighthouse(page, environmentId, projectId) {
   console.log("Starting the Lighthouse Audit");
-  const browserPath = await getBrowserPath();
-  console.log("browserPath ", browserPath);
-  const logLevel = "info";
-  let chrome;
-  log.setLevel(logLevel);
-  chrome = await chromeLauncher.launch({
-    chromePath: browserPath,
-    chromeFlags: [
-      "--headless",
-      "--no-sandbox",
-      "--disable-gpu",
-      "--disable-dev-shm-usage",
-    ],
-    logLevel,
-  });
-  const options = {
-    logLevel: "info",
-    output: "html",
-    onlyCategories: ["performance"],
-    port: chrome.port,
-  };
-  const runnerResult = await lighthouse(page.url, options);
-  console.log("runnerResult ", runnerResult);
-  writeResults(page, runnerResult, environmentId, projectId);
-  await chrome.kill();
+  let options = {};
+  if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+    chrome = require("chrome-aws-lambda");
+    puppeteer = require("puppeteer-core");
+  } else {
+    puppeteer = require("puppeteer");
+  }
+  if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+    options = {
+      args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
+      defaultViewport: chrome.defaultViewport,
+      executablePath: await chrome.executablePath,
+      headless: true,
+      ignoreHTTPSErrors: true,
+    };
+  }
+
+  try {
+    let browser = await puppeteer.launch(options);
+    const lhoptions = {
+      logLevel: "info",
+      output: "html",
+      onlyCategories: ["performance"],
+      port: chrome.port,
+    };
+    const runnerResult = await lighthouse(page.url, lhoptions);
+    console.log("runnerResult ", runnerResult);
+    writeResults(page, runnerResult, environmentId, projectId);
+    await chrome.kill();
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
 //#endregion
 
