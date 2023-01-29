@@ -74,15 +74,17 @@ async function launchChromeAndRunLighthouse(page, environmentId, projectId) {
 
   try {
     let browser = await puppeteer.launch(options);
+    const { port } = new URL(browser.wsEndpoint());
     const lhoptions = {
       logLevel: "info",
       output: "html",
       onlyCategories: ["performance"],
-      port: chrome.port,
+      port: port,
     };
     const runnerResult = await lighthouse(page.url, lhoptions);
     console.log("runnerResult ", runnerResult);
     writeResults(page, runnerResult, environmentId, projectId);
+    await browser.close();
     await chrome.kill();
   } catch (err) {
     console.error(err);
